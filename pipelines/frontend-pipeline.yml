@@ -1,1 +1,28 @@
-a
+name: CI/CD to ACR
+
+on:
+  push:
+    branches:
+      - main  # Of een andere branch die je gebruikt
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Login to Azure Container Registry
+      run: |
+        az acr login --name ${{ secrets.ACR_NAME }}
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest ./frontend
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest
