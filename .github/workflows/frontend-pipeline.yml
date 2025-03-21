@@ -1,9 +1,10 @@
 name: CI/CD to ACR
 
 on:
-  push:
-    branches:
-      - main  # Of een andere branch die je gebruikt
+  # push:
+    # branches:
+    #   - main
+    workflow_dispatch:
 
 jobs:
   build-and-push:
@@ -26,3 +27,18 @@ jobs:
       run: |
         docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest ./frontend
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest
+
+
+    - name: Update Web App with new container
+      run: |
+        az webapp config container set \
+          --name ${{ secrets.WEBAPP_NAME }} \
+          --resource-group ${{ secrets.RESOURCE_GROUP }} \
+          --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest \
+          --docker-registry-server-url https://${{ secrets.ACR_NAME }}.azurecr.io \
+          --docker-registry-server-user $(az acr credential show --name ${{ secrets.ACR_NAME }} --query username -o tsv) \
+          --docker-registry-server-password $(az acr credential show --name ${{ secrets.ACR_NAME }} --query passwords[0].value -o tsv)
+
+    - name: Restart Web App
+      run: |
+        az webapp restart --name ${{ secrets.WEBAPP_NAME }} --resource-group ${{ secrets.RESOURCE_GROUP }}
