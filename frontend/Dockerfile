@@ -11,9 +11,7 @@ RUN npm run build
 
 FROM node:18
 
-WORKDIR /app
-
-COPY --from=build /.next ./
+COPY --from=build /app ./
 
 EXPOSE 80
 CMD ["npm", "run", "start"]
