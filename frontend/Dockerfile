@@ -13,7 +13,7 @@ FROM node:18
 
 WORKDIR /app
 
-COPY --from=build /app ./
+COPY --from=build /.next ./
 
 EXPOSE 80
 CMD ["npm", "run", "start"]
