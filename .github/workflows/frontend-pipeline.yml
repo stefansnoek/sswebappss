@@ -31,16 +31,12 @@ jobs:
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest
 
 
-    - name: Update Web App with new container
+    - name: Get AKS credentials
       run: |
-        az webapp config container set \
-          --name ${{ secrets.WEBAPP_NAME }} \
-          --resource-group ${{ secrets.RESOURCE_GROUP }} \
-          --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest \
-          --docker-registry-server-url https://${{ secrets.ACR_NAME }}.azurecr.io \
-          --docker-registry-server-user $(az acr credential show --name ${{ secrets.ACR_NAME }} --query username -o tsv) \
-          --docker-registry-server-password $(az acr credential show --name ${{ secrets.ACR_NAME }} --query passwords[0].value -o tsv)
+        az aks get-credentials --resource-group sswebappss-rg --name sswebappss-aks
 
-    - name: Restart Web App
+    - name: Deploy frontend to AKS
       run: |
-        az webapp restart --name ${{ secrets.WEBAPP_NAME }} --resource-group ${{ secrets.RESOURCE_GROUP }}
+        kubectl apply -f kubernetes/frontend-deployment.yaml
+        kubectl set image deployment/frontend-deployment frontend=sswebappssacr.azurecr.io/frontend:latest
+        kubectl rollout restart deployment/frontend-deployment
