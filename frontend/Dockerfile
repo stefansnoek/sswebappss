@@ -9,9 +9,11 @@ COPY . .
 
 RUN npm run build
 
-FROM nginx:alpine
+FROM node:18
 
-COPY --from=build /app/.next /usr/share/nginx/html
+WORKDIR /app
+
+COPY --from=build /app ./
 
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "start"]
