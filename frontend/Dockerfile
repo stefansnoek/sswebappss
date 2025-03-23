@@ -11,7 +11,7 @@ RUN npm run build
 
 FROM node:18
 
-COPY --from=build /app ./
+COPY --from=build /app /app
 
 EXPOSE 80
 CMD ["npm", "run", "start"]
