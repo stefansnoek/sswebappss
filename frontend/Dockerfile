@@ -5,7 +5,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-COPY . .
+COPY . /app/
+
 RUN npm run build
 
 FROM node:18 AS production
