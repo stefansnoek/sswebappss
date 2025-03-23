@@ -5,10 +5,15 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-FROM node:18 AS production
+COPY . .
 RUN npm run build
-COPY --from=build /app/build /app/build
-COPY --from=build /app/node_modules /app/node_modules
+
+FROM node:18 AS production
+
+WORKDIR /app
+
+COPY --from=build /app /app
 
 EXPOSE 80
+
 CMD ["npm", "run", "start"]
